@@ -18,6 +18,25 @@ class CmetricsParserTest < Test::Unit::TestCase
     assert_equal expected_format_key, d.instance.format_record_key_to_splunk_style(json)
   end
 
+  sub_test_case "Actual filtering" do
+    setup do
+      @binary_path = File.join(File.dirname(__dir__), "fixtures", "cmetrics.bin")
+      @binary = File.read(@binary_path)
+    end
+
+    test "#filter_stream" do
+      d = create_driver(%[format_name_key_for_splunk_metric true])
+      time = event_time("2012-01-02 13:14:15")
+      record = {"cmetrics" => @binary}
+      d.run(default_tag: 'test') do
+        d.feed(time, record)
+      end
+      assert do
+        d.filtered.size > 0
+      end
+    end
+  end
+
   private
 
   def create_driver(conf)

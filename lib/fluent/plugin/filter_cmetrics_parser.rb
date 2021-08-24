@@ -40,6 +40,15 @@ module Fluent
         @labels_accessor = record_accessor_create(@cmetric_labels_key)
       end
 
+      def format_record_key_to_splunk_style(inner)
+        subsystem = inner.delete("subsystem")
+        labels_str = if labels = @labels_accessor.call(inner)
+                       labels_str = labels.map {|k,v| "#{k}_#{v}"}.join("_")
+                     end
+        name = inner.delete("name")
+        [subsystem, labels_str, name].compact.reject{|e| e.empty?}.join("_")
+      end
+
       def filter_stream(tag, es)
         new_es = Fluent::MultiEventStream.new
         es.each do |time, record|
@@ -50,10 +59,8 @@ module Fluent
               next if metric.empty?
 
               metric.each do |inner|
-                if @format_name_key_for_splunk_metric && labels = @labels_accessor.call(inner)
-                  name = inner.delete("name")
-                  labels_str = labels.map {|k,v| "#{k}_#{v}"}.join("_")
-                  inner["name"] = "#{labels_str}_#{name}"
+                if @format_name_key_for_splunk_metric
+                  inner["name"] = format_record_key_to_splunk_style(inner)
                 end
                 time = Time.at(inner.delete("timestamp"))
                 new_es.add(Fluent::EventTime.new(time.to_i, time.nsec), inner)

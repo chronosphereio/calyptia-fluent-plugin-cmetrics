@@ -28,11 +28,16 @@ module Fluent
 
       desc "cmetrics metric key"
       config_param :cmetric_metric_key, :string, default: "cmetric"
+      desc "cmetrics labels key"
+      config_param :cmetric_labels_key, :string, default: "labels"
+      desc "format name key for Splunk metrics"
+      config_param :format_name_key_for_splunk_metric, :bool, default: false
 
       def configure(conf)
         super
         @serde = ::CMetrics::Serde.new
         @record_accessor = record_accessor_create(@cmetric_metric_key)
+        @labels_accessor = record_accessor_create(@cmetric_labels_key)
       end
 
       def filter_stream(tag, es)
@@ -45,6 +50,11 @@ module Fluent
               next if metric.empty?
 
               metric.each do |inner|
+                if @format_name_key_for_splunk_metric && labels = @labels_accessor.call(inner)
+                  name = inner.delete("name")
+                  labels_str = labels.map {|k,v| "#{k}_#{v}"}.join("_")
+                  inner["name"] = "#{labels_str}_#{name}"
+                end
                 time = Time.at(inner.delete("timestamp"))
                 new_es.add(Fluent::EventTime.new(time.to_i, time.nsec), inner)
               end

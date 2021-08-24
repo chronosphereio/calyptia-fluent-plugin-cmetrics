@@ -27,7 +27,7 @@ module Fluent
       helpers :record_accessor
 
       desc "cmetrics metric key"
-      config_param :cmetric_metric_key, :string, default: "cmetric"
+      config_param :cmetric_metric_key, :string, default: "cmetrics"
       desc "cmetrics labels key"
       config_param :cmetric_labels_key, :string, default: "labels"
       desc "format name key for Splunk metrics"

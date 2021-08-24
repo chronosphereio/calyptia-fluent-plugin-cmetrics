@@ -1,8 +1,6 @@
 # fluent-plugin-cmetrics
 
-[Fluentd](https://fluentd.org/) parser plugin to do something.
-
-TODO: write description for you plugin.
+[Fluentd](https://fluentd.org/) plugin for cmetrics format handling.
 
 ## Installation
 
@@ -26,15 +24,30 @@ And then execute:
 $ bundle
 ```
 
-## Configuration
+## Plugin helpers
 
-You can generate configuration template:
+* [record_accessor](https://docs.fluentd.org/v/1.0/plugin-helper-overview/api-plugin-helper-record_accessor)
 
-```
-$ fluent-plugin-config-format parser cmetrics
-```
+* See also: [Filter Plugin Overview](https://docs.fluentd.org/v/1.0/filter#overview)
 
-You can copy and paste generated documents here.
+## Fluent::Plugin::CMetricsParserFilter
+
+### cmetric_metric_key (string) (optional)
+
+cmetrics metric key
+
+Default value: `cmetrics`.
+
+### cmetric_labels_key (string) (optional)
+
+cmetrics labels key
+
+Default value: `labels`.
+
+### format_name_key_for_splunk_metric (bool) (optional)
+
+format name key for Splunk metrics
+
 
 ## Copyright
 

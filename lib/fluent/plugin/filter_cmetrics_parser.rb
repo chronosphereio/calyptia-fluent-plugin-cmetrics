@@ -27,17 +27,17 @@ module Fluent
       helpers :record_accessor
 
       desc "cmetrics metric key"
-      config_param :cmetric_metric_key, :string, default: "cmetrics"
+      config_param :cmetrics_metric_key, :string, default: "cmetrics"
       desc "cmetrics labels key"
-      config_param :cmetric_labels_key, :string, default: "labels"
+      config_param :cmetrics_labels_key, :string, default: "labels"
       desc "format name key for Splunk metrics"
       config_param :format_name_key_for_splunk_metric, :bool, default: false
 
       def configure(conf)
         super
         @serde = ::CMetrics::Serde.new
-        @record_accessor = record_accessor_create(@cmetric_metric_key)
-        @labels_accessor = record_accessor_create(@cmetric_labels_key)
+        @record_accessor = record_accessor_create(@cmetrics_metric_key)
+        @labels_accessor = record_accessor_create(@cmetrics_labels_key)
       end
 
       def format_record_key_to_splunk_style(inner)

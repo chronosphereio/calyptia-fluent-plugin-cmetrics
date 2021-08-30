@@ -43,7 +43,13 @@ module Fluent
       def format_record_key_to_splunk_style(inner)
         subsystem = inner.delete("subsystem")
         labels_str = if labels = @labels_accessor.call(inner)
-                       labels_str = labels.map {|k,v| "#{k}_#{v}"}.join("_")
+                       labels_str = labels.map {|k,v|
+                         if k == "cpu"
+                           "id_#{v}"
+                         else
+                           "#{k}_#{v}"
+                         end
+                       }.join("_")
                      end
         name = inner.delete("name")
         [subsystem, labels_str, name].compact.reject{|e| e.empty?}.join("_")

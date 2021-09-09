@@ -6,10 +6,10 @@ class CmetricsParserTest < Test::Unit::TestCase
     Fluent::Test.setup
   end
 
-  data("cpu" => ['{"namespace":"node","subsystem":"cpu","labels":{"cpu":"10","mode":"system"},"name":"seconds_total","description":"Seconds the CPUs spent in each mode.","value":13153.09}', "cpu_id_10_mode_system_seconds_total"],
-       "filefd" => ['{"namespace":"node","subsystem":"filefd","name":"maximum","description":"File descriptor statistics: maximum.","value":9.223372036854776e+18}', "filefd_maximum"],
-       "disk" => ['{"namespace":"node","subsystem":"disk","labels":{"device":"nvme0n1"},"name":"io_now","description":"The number of I/Os currently in progress.","value":0.0}', "disk_device_nvme0n1_io_now"],
-       "network" => ['{"namespace":"node","subsystem":"network","labels":{"device":"eth0"},"name":"transmit_bytes_total","description":"Network device statistic bytes.","value":997193.0}', "network_device_eth0_transmit_bytes_total"],
+  data("cpu" => ['{"namespace":"node","subsystem":"cpu","labels":{"cpu":"10","mode":"system"},"name":"seconds_total","description":"Seconds the CPUs spent in each mode.","value":13153.09}', "cpu.id.10.mode.system.seconds_total"],
+       "filefd" => ['{"namespace":"node","subsystem":"filefd","name":"maximum","description":"File descriptor statistics: maximum.","value":9.223372036854776e+18}', "filefd.maximum"],
+       "disk" => ['{"namespace":"node","subsystem":"disk","labels":{"device":"nvme0n1"},"name":"io_now","description":"The number of I/Os currently in progress.","value":0.0}', "disk.device.nvme0n1.io_now"],
+       "network" => ['{"namespace":"node","subsystem":"network","labels":{"device":"eth0"},"name":"transmit_bytes_total","description":"Network device statistic bytes.","value":997193.0}', "network.device.eth0.transmit_bytes_total"],
       "none" => ['{"namespace":"node","subsystem":"","name":"load5","description":"5m load average.","value":0.94}', "load5"])
   test "#format_record_key_to_splunk_style" do |(json_str, expected_format_key)|
     json = Yajl.load(json_str)

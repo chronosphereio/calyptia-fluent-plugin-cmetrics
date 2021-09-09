@@ -45,14 +45,14 @@ module Fluent
         labels_str = if labels = @labels_accessor.call(inner)
                        labels_str = labels.map {|k,v|
                          if k == "cpu"
-                           "id_#{v}"
+                           "id.#{v}"
                          else
-                           "#{k}_#{v}"
+                           "#{k}.#{v}"
                          end
-                       }.join("_")
+                       }.join(".")
                      end
         name = inner.delete("name")
-        [subsystem, labels_str, name].compact.reject{|e| e.empty?}.join("_")
+        [subsystem, labels_str, name].compact.reject{|e| e.empty?}.join(".")
       end
 
       def filter_stream(tag, es)

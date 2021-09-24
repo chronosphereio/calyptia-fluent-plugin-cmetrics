@@ -32,22 +32,63 @@ $ bundle
 
 ## Fluent::Plugin::CMetricsParserFilter
 
-### cmetric_metric_key (string) (optional)
+### cmetrics_metric_key (string) (optional)
 
 cmetrics metric key
 
 Default value: `cmetrics`.
 
-### cmetric_labels_key (string) (optional)
+### cmetrics_labels_key (string) (optional)
 
 cmetrics labels key
 
 Default value: `labels`.
 
-### format_name_key_for_splunk_metric (bool) (optional)
+### format_to_splunk_metric (bool) (optional)
 
-format name key for Splunk metrics
+format to Splunk metrics
 
+### dimensions_key (string) (optional)
+
+dimensions key
+
+## Fluent::Plugin::CMetricsSplunkMetricPayloadFormatter
+
+### cmetrics_name_key (string) (optional)
+
+cmetrics metrics name key
+
+Default value: `name`.
+
+### cmetrics_value_key (string) (optional)
+
+cmetrics metrics value key
+
+Default value: `value`.
+
+### cmetrics_dims_key (string) (optional)
+
+cmetrics metrics dimensions key
+
+Default value: `dims`.
+
+### host_key (string) (optional)
+
+Specify host key
+
+Default value: `host`.
+
+### index (string) (optional)
+
+Specify splunk index name
+
+### source (string) (optional)
+
+Specify splunk source name
+
+### sourcetype (string) (optional)
+
+Specify splunk sourcetype name
 
 ## Copyright
 

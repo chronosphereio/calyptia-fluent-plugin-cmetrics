@@ -30,8 +30,10 @@ module Fluent
       config_param :cmetrics_metric_key, :string, default: "cmetrics"
       desc "cmetrics labels key"
       config_param :cmetrics_labels_key, :string, default: "labels"
-      desc "format name key for Splunk metrics"
-      config_param :format_name_key_for_splunk_metric, :bool, default: false
+      desc "format to Splunk metrics"
+      config_param :format_to_splunk_metric, :bool, default: false
+      desc "dimensions key"
+      config_param :dimensions_key, :string, default: nil
 
       def configure(conf)
         super
@@ -40,19 +42,17 @@ module Fluent
         @labels_accessor = record_accessor_create(@cmetrics_labels_key)
       end
 
-      def format_record_key_to_splunk_style(inner)
+      def format_to_splunk_style_with_dims(inner)
         subsystem = inner.delete("subsystem")
-        labels_str = if labels = @labels_accessor.call(inner)
-                       labels_str = labels.map {|k,v|
-                         if k == "cpu"
-                           "id.#{v}"
-                         else
-                           "#{k}.#{v}"
-                         end
-                       }.join(".")
-                     end
+        # labels will be treated as dimensions.
+        dimensions = Hash.new(0)
+        if labels = @labels_accessor.call(inner)
+          labels.map {|k,v|
+            dimensions[k] = v
+          }
+        end
         name = inner.delete("name")
-        [subsystem, labels_str, name].compact.reject{|e| e.empty?}.join(".")
+        return [subsystem, name].compact.reject{|e| e.empty?}.join("."), dimensions
       end
 
       def filter_stream(tag, es)
@@ -65,8 +65,13 @@ module Fluent
               next if metric.empty?
 
               metric.each do |inner|
-                if @format_name_key_for_splunk_metric
-                  inner["name"] = format_record_key_to_splunk_style(inner)
+                if @format_to_splunk_metric
+                  inner["name"], dims = format_to_splunk_style_with_dims(inner)
+                  if @dimensions_key
+                    inner[@dimensions_key] = dims
+                  else
+                    inner.merge!(dims)
+                  end
                 end
                 time = Time.at(inner.delete("timestamp"))
                 new_es.add(Fluent::EventTime.new(time.to_i, time.nsec), inner)

@@ -34,6 +34,8 @@ module Fluent
       config_param :cmetrics_name_key, :string, default: "name"
       desc "cmetrics metrics value key"
       config_param :cmetrics_value_key, :string, default: "value"
+      desc "cmetrics metrics dimensions key"
+      config_param :cmetrics_dims_key, :string, default: "dims"
       desc "Specify host key"
       config_param :host_key, :string, default: "host"
       desc "Specify splunk index name"
@@ -53,6 +55,7 @@ module Fluent
 
         @cmetrics_name_accessor = record_accessor_create(@cmetrics_name_key)
         @cmetrics_value_accessor = record_accessor_create(@cmetrics_value_key)
+        @cmetrics_dims_accessor = record_accessor_create(@cmetrics_dims_key)
         @host_key_accessor = record_accessor_create(@host_key)
       end
 
@@ -72,11 +75,13 @@ module Fluent
         payload[:index] = @index if @index
         payload[:source] = @source if @source
         payload[:sourcetype] = @sourcetype if @sourcetype
-
-        metric_fields = {
+        fields = {
           "metric_name:#{@cmetrics_name_accessor.call(record)}" => @cmetrics_value_accessor.call(record)
         }
-        payload.merge!(metric_fields)
+        if dims = @cmetrics_dims_accessor.call(record)
+          fields.merge!(dims)
+        end
+        payload.merge!(fields)
         Yajl.dump(payload)
       end
     end

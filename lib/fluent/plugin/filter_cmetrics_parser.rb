@@ -30,6 +30,8 @@ module Fluent
       config_param :cmetrics_metric_key, :string, default: "cmetrics"
       desc "cmetrics labels key"
       config_param :cmetrics_labels_key, :string, default: "labels"
+      desc "hostname key"
+      config_param :host_key, :string, default: "host"
       desc "format to Splunk metrics"
       config_param :format_to_splunk_metric, :bool, default: false
       desc "dimensions key"
@@ -40,6 +42,7 @@ module Fluent
         @serde = ::CMetrics::Serde.new
         @record_accessor = record_accessor_create(@cmetrics_metric_key)
         @labels_accessor = record_accessor_create(@cmetrics_labels_key)
+        @hostname_accessor = record_accessor_create(@host_key)
       end
 
       def format_to_splunk_style_with_dims(inner)
@@ -59,6 +62,7 @@ module Fluent
         new_es = Fluent::MultiEventStream.new
         es.each do |time, record|
           data = @record_accessor.call(record)
+          hostname = @hostname_accessor.call(record)
           @serde.feed_each(data) do |cmetrics|
             metrics = cmetrics.metrics
             metrics.each do |metric|
@@ -72,6 +76,9 @@ module Fluent
                   else
                     inner.merge!(dims)
                   end
+                end
+                if hostname
+                  inner[@host_key] = hostname
                 end
                 time = Time.at(inner.delete("timestamp"))
                 new_es.add(Fluent::EventTime.new(time.to_i, time.nsec), inner)

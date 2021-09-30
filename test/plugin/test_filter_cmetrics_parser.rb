@@ -61,16 +61,18 @@ class CmetricsParserTest < Test::Unit::TestCase
     test "#filter_stream with host_key" do |data|
       use_dimensions = data
       d = if use_dimensions
-            create_driver(%[
-              format_to_splunk_metric true
-              dimensions_key dims
-              host_key hostname
-            ])
+            create_driver(Fluent::Config::Element.new('ROOT', '', {
+                                                        "format_to_splunk_metric" => true,
+                                                        "dimensions_key" => "dims",
+                                                      }, [
+                                                        Fluent::Config::Element.new('fields', '', {"hostname" => ""}, [])
+                                                      ]))
           else
-            create_driver(%[
-              format_to_splunk_metric true
-              host_key hostname
-            ])
+            create_driver(Fluent::Config::Element.new('ROOT', '', {
+                                                        "format_to_splunk_metric" => true,
+                                                      }, [
+                                                        Fluent::Config::Element.new('fields', '', {"hostname" => ""}, [])
+                                                      ]))
           end
       time = event_time("2012-01-02 13:14:15")
       record = {"cmetrics" => @binary, "hostname" => Socket.gethostname}

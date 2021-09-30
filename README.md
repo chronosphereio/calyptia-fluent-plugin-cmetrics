@@ -44,6 +44,12 @@ cmetrics labels key
 
 Default value: `labels`.
 
+### host_key (string) (optional)
+
+hostname key
+
+Default value: `host`.
+
 ### format_to_splunk_metric (bool) (optional)
 
 format to Splunk metrics

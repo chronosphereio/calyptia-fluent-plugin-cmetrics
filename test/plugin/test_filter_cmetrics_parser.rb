@@ -1,5 +1,6 @@
 require "helper"
 require "fluent/plugin/filter_cmetrics_parser.rb"
+require 'socket'
 
 class CmetricsParserTest < Test::Unit::TestCase
   setup do
@@ -49,6 +50,35 @@ class CmetricsParserTest < Test::Unit::TestCase
         d.feed(time, record)
       end
       d.filtered.map {|e| assert_equal(!!use_dimensions, e.last.has_key?("dims"))}
+      d.filtered.map {|e| assert_false(e.last.has_key?("hostname"))}
+      assert do
+        d.filtered.size > 0
+      end
+    end
+
+    data("with dimensions" => "dims",
+         "without dimensions" => nil)
+    test "#filter_stream with host_key" do |data|
+      use_dimensions = data
+      d = if use_dimensions
+            create_driver(%[
+              format_to_splunk_metric true
+              dimensions_key dims
+              host_key hostname
+            ])
+          else
+            create_driver(%[
+              format_to_splunk_metric true
+              host_key hostname
+            ])
+          end
+      time = event_time("2012-01-02 13:14:15")
+      record = {"cmetrics" => @binary, "hostname" => Socket.gethostname}
+      d.run(default_tag: 'test') do
+        d.feed(time, record)
+      end
+      d.filtered.map {|e| assert_equal(!!use_dimensions, e.last.has_key?("dims"))}
+      d.filtered.map {|e| assert_true(e.last.has_key?("hostname"))}
       assert do
         d.filtered.size > 0
       end

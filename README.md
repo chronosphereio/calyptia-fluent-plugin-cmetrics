@@ -44,12 +44,6 @@ cmetrics labels key
 
 Default value: `labels`.
 
-### host_key (string) (optional)
-
-hostname key
-
-Default value: `host`.
-
 ### format_to_splunk_metric (bool) (optional)
 
 format to Splunk metrics
@@ -57,6 +51,26 @@ format to Splunk metrics
 ### dimensions_key (string) (optional)
 
 dimensions key
+
+
+### \<fields\> section (optional) (single)
+
+This secsion is used for adding extra fields into cmetrics msgpack payload parsed records.
+
+For example, the following configuration should add hostname records into parsed records:
+
+```aconf
+<filter super.awesome.tag.**>
+  @type cmetrics_parser
+  format_to_splunk_metric true
+  dimensions_key dims
+  <fields>
+    hostname
+  </fields>
+</filter>
+```
+
+On later data pipeline, `hostname` key can be used as some additional work.
 
 ## Fluent::Plugin::CMetricsSplunkMetricPayloadFormatter
 

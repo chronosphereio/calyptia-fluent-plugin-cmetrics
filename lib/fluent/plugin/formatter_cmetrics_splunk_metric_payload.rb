@@ -44,6 +44,9 @@ module Fluent
       config_param :source, :string, default: nil
       desc "Specify splunk sourcetype name"
       config_param :sourcetype, :string, default: nil
+      config_section :fields, init: false, multi: false,required: false do
+        # Nothing here. For later purpose.
+      end
 
       def initialize
         super
@@ -57,6 +60,13 @@ module Fluent
         @cmetrics_value_accessor = record_accessor_create(@cmetrics_value_key)
         @cmetrics_dims_accessor = record_accessor_create(@cmetrics_dims_key)
         @host_key_accessor = record_accessor_create(@host_key)
+        @fields_accessors = {}
+        conf.elements(name: "fields").each do |e|
+          e.each_pair{|k, _v|
+            e.has_key?(k) # Suppress unused warnings.
+            @fields_accessors[k] = record_accessor_create(k)
+          }
+        end
       end
 
       def format(tag, time, record)
@@ -65,6 +75,11 @@ module Fluent
                else
                  @default_host
                end
+        extra_fields = {}
+
+        @fields_accessors.each do |key, accessor|
+          extra_fields[key] = accessor.call(record)
+        end
         payload = {
           host: host,
           # From the API reference
@@ -80,6 +95,9 @@ module Fluent
         }
         if dims = @cmetrics_dims_accessor.call(record)
           fields.merge!(dims)
+        end
+        if @fields_accessors
+          fields.merge!(extra_fields)
         end
         payload.merge!(fields)
         Yajl.dump(payload)

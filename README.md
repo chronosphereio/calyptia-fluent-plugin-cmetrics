@@ -110,6 +110,10 @@ Specify splunk source name
 
 Specify splunk sourcetype name
 
+### \<fields\> section (optional) (single)
+
+This secsion is used for adding extra fields as dimensions into cmetrics msgpack Splunk metric payload.
+
 ## Copyright
 
 * Copyright(c) 2021- Calyptia Inc.

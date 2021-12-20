@@ -110,6 +110,12 @@ Specify splunk source name
 
 Specify splunk sourcetype name
 
+### only_use_last_field_keys (bool) (optional)
+
+Whether using only last key values or not when processing for field keys
+
+Default value: `false`
+
 ### \<fields\> section (optional) (single)
 
 This secsion is used for adding extra fields as dimensions into cmetrics msgpack Splunk metric payload.

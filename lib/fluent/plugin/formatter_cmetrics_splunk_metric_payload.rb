@@ -44,8 +44,10 @@ module Fluent
       config_param :source, :string, default: nil
       desc "Specify splunk sourcetype name"
       config_param :sourcetype, :string, default: nil
-      config_section :fields, init: false, multi: false,required: false do
-        # Nothing here. For later purpose.
+      desc "Whether using only last key values or not when processing for field keys"
+      config_param :only_use_last_field_keys, :bool, default: false
+      config_section :fields, init: false, multi: false, required: false do
+        # Other parameters nothing here. For later purpose.
       end
 
       def initialize
@@ -77,9 +79,6 @@ module Fluent
                end
         extra_fields = {}
 
-        @fields_accessors.each do |key, accessor|
-          extra_fields[key] = accessor.call(record)
-        end
         payload = {
           host: host,
           # From the API reference
@@ -96,7 +95,16 @@ module Fluent
         if dims = @cmetrics_dims_accessor.call(record)
           fields.merge!(dims)
         end
-        if @fields_accessors
+        @fields_accessors.each do |key, accessor|
+          if record = accessor.call(record)
+            record.each do |k, v|
+              if @only_use_last_field_keys
+                extra_fields[k.split(".").last] = v
+              else
+                extra_fields[k] = v
+              end
+            end
+          end
           fields.merge!(extra_fields)
         end
         payload.merge!(fields)

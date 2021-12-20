@@ -77,9 +77,6 @@ module Fluent
                end
         extra_fields = {}
 
-        @fields_accessors.each do |key, accessor|
-          extra_fields[key] = accessor.call(record)
-        end
         payload = {
           host: host,
           # From the API reference
@@ -96,7 +93,12 @@ module Fluent
         if dims = @cmetrics_dims_accessor.call(record)
           fields.merge!(dims)
         end
-        if @fields_accessors
+        @fields_accessors.each do |key, accessor|
+          if record = accessor.call(record)
+            record.each do |k, v|
+              extra_fields[k.split(".").last] = v
+            end
+          end
           fields.merge!(extra_fields)
         end
         payload.merge!(fields)

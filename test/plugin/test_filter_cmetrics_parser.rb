@@ -26,7 +26,11 @@ class CmetricsParserTest < Test::Unit::TestCase
 
   sub_test_case "Actual filtering" do
     setup do
-      @binary_path = File.join(File.dirname(__dir__), "fixtures", "cmetrics.bin")
+      if Gem::Version.new(CMetrics::VERSION) >= Gem::Version.new("0.3")
+        @binary_path = File.join(File.dirname(__dir__), "fixtures", "cmetrics_0.3.bin")
+      else
+        @binary_path = File.join(File.dirname(__dir__), "fixtures", "cmetrics_0.2.bin")
+      end
       @binary = File.read(@binary_path)
     end
 

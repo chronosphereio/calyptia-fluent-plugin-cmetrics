@@ -120,6 +120,26 @@ Default value: `false`
 
 This secsion is used for adding extra fields as dimensions into cmetrics msgpack Splunk metric payload.
 
+## Fluent::Plugin::ForwardedCMetricsParserFilter
+
+### cmetrics_labels_key (string) (optional)
+
+cmetrics labels key
+
+Default value: `labels`.
+
+### format_to_splunk_metric (bool) (optional)
+
+format to Splunk metrics
+
+### dimensions_key (string) (optional)
+
+dimensions key
+
+### \<fields\> section (optional) (single)
+
+This secsion is used for adding extra fields as dimensions into cmetrics msgpack Splunk metric payload.
+
 ## Copyright
 
 * Copyright(c) 2021- Calyptia Inc.

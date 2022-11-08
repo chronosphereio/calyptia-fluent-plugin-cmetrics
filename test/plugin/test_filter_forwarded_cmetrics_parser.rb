@@ -1,8 +1,8 @@
 require "helper"
-require "fluent/plugin/filter_cmetrics_parser.rb"
+require "fluent/plugin/filter_forwarded_cmetrics_parser.rb"
 require 'socket'
 
-class CmetricsParserTest < Test::Unit::TestCase
+class ForwardedCMetricsParserFilterTest < Test::Unit::TestCase
   setup do
     Fluent::Test.setup
   end
@@ -26,12 +26,8 @@ class CmetricsParserTest < Test::Unit::TestCase
 
   sub_test_case "Actual filtering" do
     setup do
-      if Gem::Version.new(CMetrics::VERSION) >= Gem::Version.new("0.3")
-        @binary_path = File.join(File.dirname(__dir__), "fixtures", "cmetrics_0.3.bin")
-      else
-        @binary_path = File.join(File.dirname(__dir__), "fixtures", "cmetrics_0.2.bin")
-      end
-      @binary = File.read(@binary_path)
+      @payload_path = File.join(File.dirname(__dir__), "fixtures", "forwarded_cmetrics.json")
+      @payload = File.read(@payload_path)
     end
 
     data("with dimensions" => "dims",
@@ -49,42 +45,14 @@ class CmetricsParserTest < Test::Unit::TestCase
             ])
           end
       time = event_time("2012-01-02 13:14:15")
-      record = {"cmetrics" => @binary}
+      new_es = Fluent::MultiEventStream.new
+      records = Yajl.load(@payload)
+      new_es.add(time, records)
       d.run(default_tag: 'test') do
-        d.feed(time, record)
+        d.feed(new_es)
       end
       d.filtered.map {|e| assert_equal(!!use_dimensions, e.last.has_key?("dims"))}
       d.filtered.map {|e| assert_false(e.last.has_key?("hostname"))}
-      assert do
-        d.filtered.size > 0
-      end
-    end
-
-    data("with dimensions" => "dims",
-         "without dimensions" => nil)
-    test "#filter_stream with host_key" do |data|
-      use_dimensions = data
-      d = if use_dimensions
-            create_driver(Fluent::Config::Element.new('ROOT', '', {
-                                                        "format_to_splunk_metric" => true,
-                                                        "dimensions_key" => "dims",
-                                                      }, [
-                                                        Fluent::Config::Element.new('fields', '', {"hostname" => ""}, [])
-                                                      ]))
-          else
-            create_driver(Fluent::Config::Element.new('ROOT', '', {
-                                                        "format_to_splunk_metric" => true,
-                                                      }, [
-                                                        Fluent::Config::Element.new('fields', '', {"hostname" => ""}, [])
-                                                      ]))
-          end
-      time = event_time("2012-01-02 13:14:15")
-      record = {"cmetrics" => @binary, "hostname" => Socket.gethostname}
-      d.run(default_tag: 'test') do
-        d.feed(time, record)
-      end
-      d.filtered.map {|e| assert_equal(!!use_dimensions, e.last.has_key?("dims"))}
-      d.filtered.map {|e| assert_true(e.last.has_key?("hostname"))}
       assert do
         d.filtered.size > 0
       end
@@ -94,6 +62,6 @@ class CmetricsParserTest < Test::Unit::TestCase
   private
 
   def create_driver(conf)
-    Fluent::Test::Driver::Filter.new(Fluent::Plugin::CMetricsParserFilter).configure(conf)
+    Fluent::Test::Driver::Filter.new(Fluent::Plugin::ForwardedCMetricsParserFilter).configure(conf)
   end
 end
